@@ -1,3 +1,5 @@
+"see https://qiita.com/ahiruman5/items/4f3c845500c172a02935
+
 set encoding=utf-8
 scriptencoding=utf-8
 
