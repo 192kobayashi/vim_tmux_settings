@@ -28,6 +28,8 @@ NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'bronson/vim-trailing-whitespace'
 " インデントの可視化
 NeoBundle 'Yggdroot/indentLine'
+" molokai
+NeoBundle 'tomasr/molokai'
 
 " Required:
 call neobundle#end()
@@ -56,6 +58,7 @@ set laststatus=2 " ステータスラインを常に表示
 set showmode " 現在のモードを表示
 set showcmd " 打ったコマンドをステータスラインの下に表示
 set ruler " ステータスラインの右側にカーソルの現在位置を表示する
+set statusline=%f%m%=%l,%c\ %{'['.(&fenc!=''?&fenc:&enc).']\ ['.&fileformat.']'}
 
 "----------------------------------------------------------
 " タブ・インデント
@@ -72,7 +75,7 @@ set shiftwidth=2 " smartindentで増減する幅
 "----------------------------------------------------------
 set whichwrap=b,s,h,l,<,>,[,],~ " カーソルの左右移動で行末から次の行の行頭への移動が可能になる
 set number " 行番号を表示
-set cursorline " カーソルラインをハイライト
+"set cursorline " カーソルラインをハイライト
 
 
 "----------------------------------------------------------
@@ -92,3 +95,56 @@ if &term =~ "xterm"
     inoremap <special> <expr> <Esc>[200~ XTermPasteBegin("")
 endif
 
+"----------------------------------------------------------
+" カラースキーマの設定
+" see https://qiita.com/muran001/items/3080c4816b7c2e65e40b
+"----------------------------------------------------------
+colorscheme molokai
+if &term =~ "xterm-256color" || "screen-256color"
+  set t_Co=256
+  set t_Sf=[3%dm
+  set t_Sb=[4%dm
+elseif &term =~ "xterm-color"
+  set t_Co=8
+  set t_Sf=[3%dm
+  set t_Sb=[4%dm
+endif
+
+syntax enable
+hi PmenuSel cterm=reverse ctermfg=33 ctermbg=222 gui=reverse guifg=#3399ff guibg=#f0e68c
+
+
+"----------------------------------------------------------
+" プラグインNERDTreeのカスタマイズ
+"----------------------------------------------------------
+" 起動時にNERDTree起動
+"autocmd vimenter * NERDTree
+
+" ファイル名が指定されてVIM起動した場合は表示しない
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+"dotfileを表示
+let NERDTreeShowHidden=1
+"タブ切り替え
+map <C-l> gt
+map <C-h> gT
+
+"----------------------------------------------------------
+" 連続ペーストさせるための設定
+"----------------------------------------------------------
+
+" vモードの置換連続ペースト用
+function! Put_text_without_override_register()
+  let line_len = strlen(getline('.'))
+  execute "normal! `>"
+  let col_loc = col('.')
+  execute 'normal! gv"_x'
+  if line_len == col_loc
+    execute 'normal! p'
+  else 
+    execute 'normal! P'
+  endif
+endfunction
+xnoremap <silent> p :call Put_text_without_override_register()<CR>
+
+set clipboard=unnamed "ヤンクした時に自動でクリップボードにコピー(autoselectを指定するとvモードの置換連続ペーストができない)
